@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azure Shop</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; color: #333; }
+    header {
+      background: #0078d4;
+      color: white;
+      padding: 1.2rem 2rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    h2 { margin-bottom: 1.5rem; color: #0078d4; }
+    #status { margin-bottom: 1rem; color: #666; font-size: 0.9rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-4px); }
+    .card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #e0e0e0;
+    }
+    .card-body { padding: 1rem; }
+    .card-body h3 { font-size: 1rem; margin-bottom: 0.4rem; }
+    .card-body p { color: #666; font-size: 0.85rem; margin-bottom: 0.6rem; }
+    .price { font-size: 1.2rem; font-weight: bold; color: #0078d4; }
+    .error { color: #c00; background: #fff0f0; padding: 1rem; border-radius: 6px; }
+    .loading { color: #888; }
+    .placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #e0eaf5 0%, #ccdced 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #0078d4;
+    }
+  </style>
+</head>
+<body>
+  <header>Azure Shop</header>
+  <main>
+    <h2>Products</h2>
+    <div id="status" class="loading">Loading products...</div>
+    <div id="grid" class="grid"></div>
+  </main>
+
+  <script>
+    async function loadProducts() {
+      const status = document.getElementById('status');
+      const grid = document.getElementById('grid');
+      try {
+        const res = await fetch('/products');
+        if (!res.ok) throw new Error('API error ' + res.status);
+        const products = await res.json();
+        status.textContent = `${products.length} product(s) found`;
+        grid.innerHTML = products.map(p => `
+          <div class="card">
+            ${p.image_url
+              ? `<img src="${p.image_url}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+              : ''
+            }
+            <div class="placeholder" style="display:${p.image_url ? 'none' : 'flex'}">🛒</div>
+            <div class="card-body">
+              <h3>${p.name}</h3>
+              <p>${p.description || ''}</p>
+              <div class="price">$${parseFloat(p.price).toFixed(2)}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        status.textContent = '';
+        grid.innerHTML = `<div class="error">Could not load products: ${err.message}</div>`;
+      }
+    }
+    loadProducts();
+  </script>
+</body>
+</html>
