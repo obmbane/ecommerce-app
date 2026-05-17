@@ -3,7 +3,9 @@ const sql = require('mssql');
 const cors = require('cors');
 
 const app = express();
+const healthApp = express();
 const PORT = process.env.PORT || 4000;
+const HEALTH_PORT = process.env.HEALTH_PORT || 4001;
 
 app.use(cors());
 app.use(express.json());
@@ -28,7 +30,7 @@ async function getPool() {
   return pool;
 }
 
-app.get('/health', (req, res) => {
+healthApp.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
@@ -47,4 +49,8 @@ app.get('/products', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`API running on port ${PORT}`);
+});
+
+healthApp.listen(HEALTH_PORT, () => {
+  console.log(`Health check running on port ${HEALTH_PORT}`);
 });
